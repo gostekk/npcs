@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
 
@@ -9,16 +9,21 @@ import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-import { withStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/styles';
 
-const styles = {
+// Context
+import { AppContext } from '../context/AppContext';
+
+const useStyles = makeStyles({
   grow: {
     flexGrow: 1,
   },
-};
+});
 
 function Navigation(props) {
-  const { classes, history, location } = props;
+  const classes = useStyles();
+  const { auth } = useContext(AppContext);
+  const { history, location } = props;
 
   return (
     <div>
@@ -34,7 +39,10 @@ function Navigation(props) {
           <Typography variant="h6" align={location.pathname === '/' ? 'left' : 'center'} color="inherit" className={classes.grow}>
             NPC Sheet
           </Typography>
-          <Button color="inherit" onClick={() => history.push('/add')}>Dodaj postać</Button>
+          { auth
+            ? <Button color="inherit" onClick={() => history.push('/add')}>Dodaj postać</Button>
+            : <Button color="inherit" onClick={() => history.push('/auth')}>Odblokuj</Button>
+          }
         </Toolbar>
       </AppBar>
     </div>
@@ -42,9 +50,8 @@ function Navigation(props) {
 }
 
 Navigation.propTypes = {
-  classes: PropTypes.object.isRequired,
   history: PropTypes.shape({ push: PropTypes.func.isRequired }).isRequired,
   location: PropTypes.shape({ pathname: PropTypes.string.isRequired }).isRequired,
 };
 
-export default withStyles(styles)(withRouter(Navigation));
+export default (withRouter(Navigation));

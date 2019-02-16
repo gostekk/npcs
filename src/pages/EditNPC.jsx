@@ -1,6 +1,5 @@
-import React, { Component } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import axios from 'axios';
 import { withSnackbar } from 'notistack';
 
 // Material-ui
@@ -10,7 +9,7 @@ import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import TextField from '@material-ui/core/TextField';
-import { withStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/styles';
 
 // Image preview
 import Card from '@material-ui/core/Card';
@@ -18,7 +17,11 @@ import CardHeader from '@material-ui/core/CardHeader';
 import CardMedia from '@material-ui/core/CardMedia';
 import CardActions from '@material-ui/core/CardActions';
 
-const styles = theme => ({
+// Context
+import { CharactersContext } from '../context/CharactersContext';
+import { AppContext } from '../context/AppContext';
+
+const useStyles = makeStyles(theme => ({
   root: {
     ...theme.mixins.gutters(),
     [theme.breakpoints.up('sm')]: {
@@ -69,526 +72,478 @@ const styles = theme => ({
   rightActions: {
     marginLeft: 'auto',
   },
-});
+}));
 
-const abilities = [
-  {
-    value: '',
-    label: '',
-  },
-  {
-    value: 'Siła',
-    label: 'Siła',
-  },
-  {
-    value: 'Zręczność',
-    label: 'Zręczność',
-  },
-  {
-    value: 'Budowa',
-    label: 'Budowa',
-  },
-  {
-    value: 'Inteligencja',
-    label: 'Inteligencja',
-  },
-  {
-    value: 'Roztropność',
-    label: 'Roztropność',
-  },
-  {
-    value: 'Charyzma',
-    label: 'Charyzma',
-  },
-];
+function useFormInput(initialValue) {
+  const [value, setValue] = useState(initialValue);
 
-class EditRecap extends Component {
-  state = {
-    name: 'Ładowanie...',
-    race: 'Ładowanie...',
-    sex: 'Ładowanie...',
-    job: 'Ładowanie...',
-    specialSign: 'Ładowanie...',
-    appearance: 'Ładowanie...',
-    abilityHigh: 'Ładowanie...',
-    abilityLow: 'Ładowanie...',
-    profficiency: 'Ładowanie...',
-    languages: 'Ładowanie...',
-    talent: 'Ładowanie...',
-    manners: 'Ładowanie...',
-    conversation: 'Ładowanie...',
-    ideal: 'Ładowanie...',
-    bond: 'Ładowanie...',
-    flaw: 'Ładowanie...',
-    kin: 'Ładowanie...',
-    loading: true,
-    errors: {},
+  function handleChange(e) {
+    setValue(e.target.value);
   }
 
-  componentWillMount() {
-    const { match } = this.props;
-
-    axios.get(`http://back.gostekk.pl/api/npcs/${match.params.id}`)
-      .then((res) => {
-        const {
-          name,
-          race,
-          sex,
-          job,
-          specialSign,
-          appearance,
-          abilityHigh,
-          abilityLow,
-          profficiency,
-          languages,
-          talent,
-          manners,
-          conversation,
-          ideal,
-          bond,
-          flaw,
-          kin,
-          imgFile,
-        } = res.data;
-
-        this.setState({
-          name,
-          race: race ? race : '',
-          sex: sex ? sex : '',
-          job: job ? job : '',
-          specialSign: specialSign ? specialSign : '',
-          appearance: appearance ? appearance : '',
-          abilityHigh: abilityHigh ? abilityHigh : '',
-          abilityLow: abilityLow ? abilityLow : '',
-          profficiency: profficiency ? profficiency : '',
-          languages: languages ? languages : '',
-          talent: talent ? talent : '',
-          manners: manners ? manners : '',
-          conversation: conversation ? conversation : '',
-          ideal: ideal ? ideal : '',
-          bond: bond ? bond : '',
-          flaw: flaw ? flaw : '',
-          kin: kin ? kin : '',
-          imgFile: imgFile ? imgFile : '',
-          loading: false,
-        });
-      })
-      .catch(err => this.setState({ errors: err.response.data ? err.response.data : '' }));
+  function handleSet(e) {
+    setValue(e);
   }
 
-  handleChange = name => (event) => {
-    this.setState({
-      [name]: event.target.value,
-    });
+  return {
+    value,
+    onChange: handleChange,
+    set: handleSet,
+  };
+}
+
+function useImageInput(initialValue) {
+  const [value, setValue] = useState(initialValue);
+  const [showValue, setShowValue] = useState('/image.jpg');
+
+  const handleChange = (e) => {
+    setValue(e.target.files[0]);
+    setShowValue(URL.createObjectURL(e.target.files[0]));
   };
 
-  handleSubmit = () => {
-    const {
-      fetchData,
-      match,
-      history,
-      enqueueSnackbar,
-    } = this.props;
-
-    const {
-      name,
-      race,
-      sex,
-      job,
-      specialSign,
-      appearance,
-      abilityHigh,
-      abilityLow,
-      profficiency,
-      languages,
-      talent,
-      manners,
-      conversation,
-      ideal,
-      bond,
-      flaw,
-      kin,
-      imgFile,
-    } = this.state;
-
-    const newCharacter = {
-      name,
-      race,
-      sex,
-      job,
-      specialSign,
-      appearance,
-      abilityHigh,
-      abilityLow,
-      profficiency,
-      languages,
-      talent,
-      manners,
-      conversation,
-      ideal,
-      bond,
-      flaw,
-      kin,
-      imgFile,
-    };
-
-    axios.post(`http://back.gostekk.pl/api/npcs/edit/${match.params.id}`, newCharacter)
-      .then(() => {
-        fetchData();
-        enqueueSnackbar('Edycja postaci przebiegła pomyślnie', { variant: 'success' });
-        history.push('/');
-      })
-      .catch((err) => {
-        enqueueSnackbar('Wystąpił błąd walidacji', { variant: 'error' });
-        this.setState({ errors: err.response.data });
-      });
+  const clearValue = () => {
+    setValue(null);
+    setShowValue('/image.jpg');
   };
 
-  render() {
-    const { classes, history } = this.props;
-    const {
-      name,
-      race,
-      sex,
-      job,
-      specialSign,
-      appearance,
-      abilityHigh,
-      abilityLow,
-      profficiency,
-      languages,
-      talent,
-      manners,
-      conversation,
-      ideal,
-      bond,
-      flaw,
-      kin,
-      imgFile,
-      loading,
-      errors,
-    } = this.state;
+  function handleSet(e) {
+    setValue(e || null);
+    setShowValue(e ? `/images/${e}` : '/image.jpg');
+  }
 
-    return (
-      <Paper className={classes.root}>
-        <form noValidate autoComplete="off">
-          <div className={classes.section1}>
-            <Grid container justify="space-between">
-              <Grid container item sm={12} md={6}>
-                <Grid item xs={12}>
-                  <TextField
-                    id="name"
-                    label="Imię postaci"
-                    fullWidth
-                    disabled={loading}
-                    error={!!errors.name}
-                    helperText={errors.name ? errors.name : undefined}
-                    value={name}
-                    onChange={this.handleChange('name')}
-                    margin="normal"
-                    variant="outlined"
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    id="race"
-                    label="Rasa"
-                    fullWidth
-                    disabled={loading}
-                    value={race}
-                    onChange={this.handleChange('race')}
-                    margin="normal"
-                    variant="outlined"
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    id="sex"
-                    select
-                    label="Płeć"
-                    fullWidth
-                    disabled={loading}
-                    value={sex}
-                    onChange={this.handleChange('sex')}
-                    SelectProps={{
-                      native: true,
-                    }}
-                    margin="normal"
-                    variant="outlined"
-                  >
-                    <option value="" />
-                    <option value="Mężczyzna">
-                      Mężczyzna
-                    </option>
-                    <option value="Kobieta">
-                      Kobieta
-                    </option>
-                  </TextField>
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    id="job"
-                    label="Zawód"
-                    fullWidth
-                    value={job}
-                    disabled={loading}
-                    onChange={this.handleChange('job')}
-                    margin="normal"
-                    variant="outlined"
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    id="specialSign"
-                    label="Znak szczególny wyglądu"
-                    fullWidth
-                    value={specialSign}
-                    disabled={loading}
-                    onChange={this.handleChange('specialSign')}
-                    margin="normal"
-                    variant="outlined"
-                  />
-                </Grid>
+  return {
+    value,
+    onChange: handleChange,
+    showValue,
+    set: handleSet,
+    clearValue,
+  };
+}
+
+
+function EditRecap(props) {
+  const name = useFormInput('Ładowanie...');
+  const race = useFormInput('Ładowanie...');
+  const sex = useFormInput('Ładowanie...');
+  const job = useFormInput('Ładowanie...');
+  const specialSign = useFormInput('Ładowanie...');
+  const appearance = useFormInput('Ładowanie...');
+  const abilityHigh = useFormInput('Ładowanie...');
+  const abilityLow = useFormInput('Ładowanie...');
+  const profficiency = useFormInput('Ładowanie...');
+  const languages = useFormInput('Ładowanie...');
+  const talent = useFormInput('Ładowanie...');
+  const manners = useFormInput('Ładowanie...');
+  const conversation = useFormInput('Ładowanie...');
+  const ideal = useFormInput('Ładowanie...');
+  const bond = useFormInput('Ładowanie...');
+  const flaw = useFormInput('Ładowanie...');
+  const kin = useFormInput('Ładowanie...');
+  const imgFile = useImageInput(null);
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(true);
+  const classes = useStyles();
+  const { editCharacter, getCharacter } = useContext(CharactersContext);
+  const { abilitiesList } = useContext(AppContext);
+  const { history, match, enqueueSnackbar } = props;
+
+  async function fetchCharacter() {
+    try {
+      const character = await getCharacter(match.params.id);
+      name.set(character.name);
+      race.set(character.race);
+      sex.set(character.sex);
+      job.set(character.job);
+      specialSign.set(character.specialSign);
+      appearance.set(character.appearance);
+      abilityHigh.set(character.abilityHigh);
+      abilityLow.set(character.abilityLow);
+      profficiency.set(character.profficiency);
+      languages.set(character.languages);
+      talent.set(character.talent);
+      manners.set(character.manners);
+      conversation.set(character.conversation);
+      ideal.set(character.ideal);
+      bond.set(character.bond);
+      flaw.set(character.flaw);
+      kin.set(character.kin);
+      imgFile.set(character.imgFile);
+      setLoading(false);
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  useEffect(() => {
+    fetchCharacter();
+  }, []);
+
+  const handleSubmit = async () => {
+    const data = new FormData();
+    data.append('file', imgFile.value);
+    data.append('name', name.value);
+    data.append('race', race.value);
+    data.append('sex', sex.value);
+    data.append('job', job.value);
+    data.append('specialSign', specialSign.value);
+    data.append('appearance', appearance.value);
+    data.append('abilityHigh', abilityHigh.value);
+    data.append('abilityLow', abilityLow.value);
+    data.append('profficiency', profficiency.value);
+    data.append('languages', languages.value);
+    data.append('talent', talent.value);
+    data.append('manners', manners.value);
+    data.append('conversation', conversation.value);
+    data.append('ideal', ideal.value);
+    data.append('bond', bond.value);
+    data.append('flaw', flaw.value);
+    data.append('kin', kin.value);
+    try {
+      const characterId = match.params.id;
+      await editCharacter(characterId, data);
+      enqueueSnackbar('Edycja postaci przebiegła pomyślnie', { variant: 'success' });
+      history.push('/');
+    } catch (e) {
+      const errorsValue = e.response.data ? e.response.data : '';
+      setErrors(errorsValue);
+      enqueueSnackbar('Wystąpił błąd walidacji', { variant: 'error' });
+    }
+  };
+
+  return (
+    <Paper className={classes.root}>
+      <form noValidate autoComplete="off">
+        <div className={classes.section1}>
+          <Grid container justify="space-between">
+            <Grid container item sm={12} md={6}>
+              <Grid item xs={12}>
+                <TextField
+                  multiline
+                  onChange={name.onChange}
+                  value={name.value}
+                  id="name"
+                  label="Imię postaci"
+                  fullWidth
+                  disabled={loading}
+                  error={!!errors.name}
+                  helperText={errors.name ? errors.name : undefined}
+                  margin="normal"
+                  variant="outlined"
+                />
               </Grid>
-              <Grid container item sm={12} md={6} justify="center">
-                <Card className={classes.card}>
-                  <CardHeader
-                    title="Obraz postaci"
-                  />
-                  <CardMedia
-                    className={classes.media1}
-                    image={imgFile ? URL.createObjectURL(imgFile) : '/image.jpg'}
-                    title="Obraz Postaci"
-                  />
-                  <CardActions className={classes.actions} disableActionSpacing>
-                    <Button
-                      variant="contained"
-                      color="secondary"
-                      disabled={imgFile === null}
-                      className={classes.button}
-                      onClick={this.ClearImgFile}
-                    >
-                      Usuń
-                    </Button>
-                    <div className={classes.rightActions}>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  multiline
+                  onChange={race.onChange}
+                  value={race.value}
+                  id="race"
+                  label="Rasa"
+                  fullWidth
+                  disabled={loading}
+                  margin="normal"
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  multiline
+                  onChange={sex.onChange}
+                  value={sex.value}
+                  id="sex"
+                  select
+                  label="Płeć"
+                  fullWidth
+                  disabled={loading}
+                  SelectProps={{
+                    native: true,
+                  }}
+                  margin="normal"
+                  variant="outlined"
+                >
+                  <option value="" />
+                  <option value="Mężczyzna">
+                    Mężczyzna
+                  </option>
+                  <option value="Kobieta">
+                    Kobieta
+                  </option>
+                </TextField>
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  multiline
+                  onChange={job.onChange}
+                  value={job.value}
+                  id="job"
+                  label="Zawód"
+                  fullWidth
+                  disabled={loading}
+                  margin="normal"
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  multiline
+                  onChange={specialSign.onChange}
+                  value={specialSign.value}
+                  id="specialSign"
+                  label="Znak szczególny wyglądu"
+                  fullWidth
+                  disabled={loading}
+                  margin="normal"
+                  variant="outlined"
+                />
+              </Grid>
+            </Grid>
+            <Grid container item sm={12} md={6} justify="center">
+              <Card className={classes.card}>
+                <CardHeader
+                  title="Obraz postaci"
+                />
+                <CardMedia
+                  className={classes.media1}
+                  image={imgFile.showValue}
+                  title="Obraz Postaci"
+                />
+                <CardActions className={classes.actions} disableActionSpacing>
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    disabled={imgFile === null}
+                    className={classes.button}
+                    onClick={imgFile.clearValue}
+                  >
+                    Usuń
+                  </Button>
+                  <div className={classes.rightActions}>
+                    <label htmlFor="imgFile">
                       <input
                         type="file"
                         accept="image/*"
                         className={classes.input}
                         id="imgFile"
                         name="imgFile"
-                        onChange={this.handleImageSelect}
+                        onChange={imgFile.onChange}
                       />
-                      <label htmlFor="imgFile">
-                        <Button
-                          component="span"
-                          variant="contained"
-                          color="secondary"
-                          className={classes.button}>
-                          Dodaj
-                          <CloudUploadIcon className={classes.rightIcon} />
-                        </Button>
-                      </label>
-                    </div>
-                  </CardActions>
-                </Card>
-              </Grid>
+                      <Button
+                        component="span"
+                        variant="contained"
+                        color="secondary"
+                        className={classes.button}
+                      >
+                        Dodaj
+                        <CloudUploadIcon className={classes.rightIcon} />
+                      </Button>
+                    </label>
+                  </div>
+                </CardActions>
+              </Card>
             </Grid>
-          </div>
-          <Divider variant="middle" />
-          <div className={classes.section2}>
-            <Grid container justify="space-between">
-              <Grid item xs={12}>
-                <TextField
-                  id="appearance"
-                  fullWidth
-                  multiline
-                  label="Wygląd postaci"
-                  placeholder="Krótki opis wyglądu postaci (kolor włosów, oczu, karnacji lub znaki szczególne)"
-                  disabled={loading}
-                  value={appearance}
-                  onChange={this.handleChange('appearance')}
-                  margin="normal"
-                  variant="outlined"
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  id="abilityHigh"
-                  select
-                  label="Wysoka statystyka"
-                  fullWidth
-                  disabled={loading}
-                  value={abilityHigh}
-                  onChange={this.handleChange('abilityHigh')}
-                  SelectProps={{
-                    native: true,
-                  }}
-                  margin="normal"
-                  variant="outlined"
-                >
-                  {abilities.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </TextField>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  id="abilityLow"
-                  select
-                  label="Niska statystyka"
-                  fullWidth
-                  disabled={loading}
-                  value={abilityLow}
-                  onChange={this.handleChange('abilityLow')}
-                  SelectProps={{
-                    native: true,
-                  }}
-                  margin="normal"
-                  variant="outlined"
-                >
-                  {abilities.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </TextField>
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  id="profficiency"
-                  label="Biegłość"
-                  fullWidth
-                  disabled={loading}
-                  value={profficiency}
-                  onChange={this.handleChange('profficiency')}
-                  margin="normal"
-                  variant="outlined"
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  id="languages"
-                  label="Języki"
-                  fullWidth
-                  disabled={loading}
-                  value={languages}
-                  onChange={this.handleChange('languages')}
-                  margin="normal"
-                  variant="outlined"
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  id="talent"
-                  label="Talent"
-                  fullWidth
-                  disabled={loading}
-                  value={talent}
-                  onChange={this.handleChange('talent')}
-                  margin="normal"
-                  variant="outlined"
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  id="manners"
-                  label="Maniery"
-                  fullWidth
-                  disabled={loading}
-                  value={manners}
-                  onChange={this.handleChange('manners')}
-                  margin="normal"
-                  variant="outlined"
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  id="conversation"
-                  label="Zachowanie podczas rozmowy"
-                  fullWidth
-                  disabled={loading}
-                  value={conversation}
-                  onChange={this.handleChange('conversation')}
-                  margin="normal"
-                  variant="outlined"
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  id="ideal"
-                  label="Ideał"
-                  fullWidth
-                  disabled={loading}
-                  value={ideal}
-                  onChange={this.handleChange('ideal')}
-                  margin="normal"
-                  variant="outlined"
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  id="bond"
-                  label="Więź/Zobowiązanie"
-                  fullWidth
-                  disabled={loading}
-                  value={bond}
-                  onChange={this.handleChange('bond')}
-                  margin="normal"
-                  variant="outlined"
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  id="flaw"
-                  label="Wada/sekret"
-                  fullWidth
-                  disabled={loading}
-                  value={flaw}
-                  onChange={this.handleChange('flaw')}
-                  margin="normal"
-                  variant="outlined"
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  id="kin"
-                  label="Krewni"
-                  fullWidth
-                  disabled={loading}
-                  value={kin}
-                  onChange={this.handleChange('kin')}
-                  margin="normal"
-                  variant="outlined"
-                />
-              </Grid>
+          </Grid>
+        </div>
+        <Divider variant="middle" />
+        <div className={classes.section2}>
+          <Grid container justify="space-between">
+            <Grid item xs={12}>
+              <TextField
+                onChange={appearance.onChange}
+                value={appearance.value}
+                id="appearance"
+                fullWidth
+                multiline
+                label="Wygląd postaci"
+                placeholder="Krótki opis wyglądu postaci (kolor włosów, oczu, karnacji lub znaki szczególne)"
+                disabled={loading}
+                margin="normal"
+                variant="outlined"
+              />
             </Grid>
-          </div>
-          <div className={classes.section3}>
-            <Grid container justify="space-between">
-              <Grid item>
-                <Button variant="contained" color="primary" onClick={() => history.push('/')}>
-                  Wstecz
-                </Button>
-              </Grid>
-              <Grid item>
-                <Button variant="contained" color="primary" disabled={loading} onClick={this.handleSubmit}>
-                  Zapisz
-                </Button>
-              </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                multiline
+                onChange={abilityHigh.onChange}
+                value={abilityHigh.value}
+                id="abilityHigh"
+                select
+                label="Wysoka statystyka"
+                fullWidth
+                disabled={loading}
+                SelectProps={{
+                  native: true,
+                }}
+                margin="normal"
+                variant="outlined"
+              >
+                {abilitiesList.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </TextField>
             </Grid>
-          </div>
-        </form>
-      </Paper>
-    );
-  }
+            <Grid item xs={12} sm={6}>
+              <TextField
+                multiline
+                onChange={abilityLow.onChange}
+                value={abilityLow.value}
+                id="abilityLow"
+                select
+                label="Niska statystyka"
+                fullWidth
+                disabled={loading}
+                SelectProps={{
+                  native: true,
+                }}
+                margin="normal"
+                variant="outlined"
+              >
+                {abilitiesList.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </TextField>
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                multiline
+                onChange={profficiency.onChange}
+                value={profficiency.value}
+                id="profficiency"
+                label="Biegłość"
+                fullWidth
+                disabled={loading}
+                margin="normal"
+                variant="outlined"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                multiline
+                onChange={languages.onChange}
+                value={languages.value}
+                id="languages"
+                label="Języki"
+                fullWidth
+                disabled={loading}
+                margin="normal"
+                variant="outlined"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                multiline
+                onChange={talent.onChange}
+                value={talent.value}
+                id="talent"
+                label="Talent"
+                fullWidth
+                disabled={loading}
+                margin="normal"
+                variant="outlined"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                multiline
+                onChange={manners.onChange}
+                value={manners.value}
+                id="manners"
+                label="Maniery"
+                fullWidth
+                disabled={loading}
+                margin="normal"
+                variant="outlined"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                multiline
+                onChange={conversation.onChange}
+                value={conversation.value}
+                id="conversation"
+                label="Zachowanie podczas rozmowy"
+                fullWidth
+                disabled={loading}
+                margin="normal"
+                variant="outlined"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                multiline
+                onChange={ideal.onChange}
+                value={ideal.value}
+                id="ideal"
+                label="Ideał"
+                fullWidth
+                disabled={loading}
+                margin="normal"
+                variant="outlined"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                multiline
+                onChange={bond.onChange}
+                value={bond.value}
+                id="bond"
+                label="Więź/Zobowiązanie"
+                fullWidth
+                disabled={loading}
+                margin="normal"
+                variant="outlined"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                multiline
+                onChange={flaw.onChange}
+                value={flaw.value}
+                id="flaw"
+                label="Wada/sekret"
+                fullWidth
+                disabled={loading}
+                margin="normal"
+                variant="outlined"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                multiline
+                onChange={kin.onChange}
+                value={kin.value}
+                id="kin"
+                label="Krewni"
+                fullWidth
+                disabled={loading}
+                margin="normal"
+                variant="outlined"
+              />
+            </Grid>
+          </Grid>
+        </div>
+        <div className={classes.section3}>
+          <Grid container justify="space-between">
+            <Grid item>
+              <Button variant="contained" color="primary" onClick={() => history.push('/')}>
+                Wstecz
+              </Button>
+            </Grid>
+            <Grid item>
+              <Button variant="contained" color="primary" disabled={loading} onClick={handleSubmit}>
+                Zapisz
+              </Button>
+            </Grid>
+          </Grid>
+        </div>
+      </form>
+    </Paper>
+  );
 }
 
 EditRecap.propTypes = {
-  classes: PropTypes.object.isRequired,
-  fetchData: PropTypes.func.isRequired,
   match: PropTypes.shape(
     { params: PropTypes.shape({ id: PropTypes.string.isRequired }) },
   ).isRequired,
@@ -596,4 +551,4 @@ EditRecap.propTypes = {
   enqueueSnackbar: PropTypes.func.isRequired,
 };
 
-export default withStyles(styles)(withSnackbar(EditRecap));
+export default withSnackbar(EditRecap);

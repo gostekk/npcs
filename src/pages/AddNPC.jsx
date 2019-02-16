@@ -1,6 +1,5 @@
-import React, { Component } from 'react';
+import React, { useState, useContext } from 'react';
 import PropTypes from 'prop-types';
-import axios from 'axios';
 import { withSnackbar } from 'notistack';
 
 // Material-ui
@@ -10,7 +9,7 @@ import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import TextField from '@material-ui/core/TextField';
-import { withStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/styles';
 
 // Image preview
 import Card from '@material-ui/core/Card';
@@ -18,7 +17,11 @@ import CardHeader from '@material-ui/core/CardHeader';
 import CardMedia from '@material-ui/core/CardMedia';
 import CardActions from '@material-ui/core/CardActions';
 
-const styles = theme => ({
+// Context
+import { CharactersContext } from '../context/CharactersContext';
+import { AppContext } from '../context/AppContext';
+
+const useStyles = makeStyles(theme => ({
   root: {
     ...theme.mixins.gutters(),
     [theme.breakpoints.up('sm')]: {
@@ -69,507 +72,402 @@ const styles = theme => ({
   rightActions: {
     marginLeft: 'auto',
   },
-});
+}));
 
-const abilities = [
-  {
-    value: '',
-    label: '',
-  },
-  {
-    value: 'Siła',
-    label: 'Siła',
-  },
-  {
-    value: 'Zręczność',
-    label: 'Zręczność',
-  },
-  {
-    value: 'Budowa',
-    label: 'Budowa',
-  },
-  {
-    value: 'Inteligencja',
-    label: 'Inteligencja',
-  },
-  {
-    value: 'Roztropność',
-    label: 'Roztropność',
-  },
-  {
-    value: 'Charyzma',
-    label: 'Charyzma',
-  },
-];
+function useFormInput(initialValue) {
+  const [value, setValue] = useState(initialValue);
 
-// const languagesList = [
-//   'Common',
-//   'Dwarvish',
-//   'Elvish',
-//   'Giant',
-//   'Gnomish',
-//   'Goblin',
-//   'Halfling',
-//   'Orc',
-//   'Abyssal',
-//   'Celestial',
-//   'Draconic',
-//   'Deep Speech',
-//   'Infernal',
-//   'Primordial',
-//   'Sylvan',
-//   'Undercommon',
-//   'Druidic',
-// ];
-
-class AddRecap extends Component {
-  state = {
-    name: '',
-    race: '',
-    sex: '',
-    job: '',
-    specialSign: '',
-    appearance: '',
-    abilityHigh: '',
-    abilityLow: '',
-    profficiency: '',
-    languages: '',
-    talent: '',
-    manners: '',
-    conversation: '',
-    ideal: '',
-    bond: '',
-    flaw: '',
-    kin: '',
-    imgFile: null,
-    errors: {},
+  function handleChange(e) {
+    setValue(e.target.value);
   }
 
-  handleChange = name => (event) => {
-    this.setState({
-      [name]: event.target.value,
-    });
+  return {
+    value,
+    onChange: handleChange,
+  };
+}
+
+function useImageInput(initialValue) {
+  const [value, setValue] = useState(initialValue);
+  const [showValue, setShowValue] = useState('/image.jpg');
+
+  const handleChange = (e) => {
+    setValue(e.target.files[0]);
+    setShowValue(URL.createObjectURL(e.target.files[0]));
   };
 
-  handleImageSelect = (event) => {
-    this.setState({
-      imgFile: event.target.files[0],
-    });
+  const clearValue = () => {
+    setValue(null);
+    setShowValue('/image.jpg');
   };
 
-  ClearImgFile = () => {
-    this.setState({
-      imgFile: null,
-    });
+  return {
+    value,
+    onChange: handleChange,
+    showValue,
+    clearValue,
   };
+}
 
-  handleSubmit = () => {
-    const { fetchData, history, enqueueSnackbar } = this.props;
-    const {
-      name,
-      race,
-      sex,
-      job,
-      specialSign,
-      appearance,
-      abilityHigh,
-      abilityLow,
-      profficiency,
-      languages,
-      talent,
-      manners,
-      conversation,
-      ideal,
-      bond,
-      flaw,
-      kin,
-      imgFile,
-    } = this.state;
+function AddRecap(props) {
+  const name = useFormInput('');
+  const race = useFormInput('');
+  const sex = useFormInput('');
+  const job = useFormInput('');
+  const specialSign = useFormInput('');
+  const appearance = useFormInput('');
+  const abilityHigh = useFormInput('');
+  const abilityLow = useFormInput('');
+  const profficiency = useFormInput('');
+  const languages = useFormInput('');
+  const talent = useFormInput('');
+  const manners = useFormInput('');
+  const conversation = useFormInput('');
+  const ideal = useFormInput('');
+  const bond = useFormInput('');
+  const flaw = useFormInput('');
+  const kin = useFormInput('');
+  const imgFile = useImageInput(null);
+  const [errors, setErrors] = useState({});
+  const classes = useStyles();
+  const { addCharacter } = useContext(CharactersContext);
+  const { abilitiesList } = useContext(AppContext);
 
+  const { history, enqueueSnackbar } = props;
+
+  const handleSubmit = async () => {
     const data = new FormData();
-    data.append('file', imgFile);
-    data.append('name', name);
-    data.append('race', race);
-    data.append('sex', sex);
-    data.append('job', job);
-    data.append('specialSign', specialSign);
-    data.append('appearance', appearance);
-    data.append('abilityHigh', abilityHigh);
-    data.append('abilityLow', abilityLow);
-    data.append('profficiency', profficiency);
-    data.append('languages', languages);
-    data.append('talent', talent);
-    data.append('manners', manners);
-    data.append('conversation', conversation);
-    data.append('ideal', ideal);
-    data.append('bond', bond);
-    data.append('flaw', flaw);
-    data.append('kin', kin);
-
-    axios.post('http://back.gostekk.pl/api/npcs', data)
-      .then(() => {
-        fetchData();
-        enqueueSnackbar('Nowa postać została pomyślnie dodana', { variant: 'success' });
-        this.setState({
-          name: '',
-          race: '',
-          sex: '',
-          job: '',
-          specialSign: '',
-          appearance: '',
-          abilityHigh: '',
-          abilityLow: '',
-          profficiency: '',
-          languages: '',
-          talent: '',
-          manners: '',
-          conversation: '',
-          ideal: '',
-          bond: '',
-          flaw: '',
-          kin: '',
-          imgFile: null,
-          errors: {},
-        });
-        history.push('/');
-      })
-      .catch((err) => {
-        enqueueSnackbar('Wystąpił błąd walidacji', { variant: 'error' });
-        this.setState({ errors: err.response.data ? err.response.data : '' });
-      });
+    data.append('file', imgFile.value);
+    data.append('name', name.value);
+    data.append('race', race.value);
+    data.append('sex', sex.value);
+    data.append('job', job.value);
+    data.append('specialSign', specialSign.value);
+    data.append('appearance', appearance.value);
+    data.append('abilityHigh', abilityHigh.value);
+    data.append('abilityLow', abilityLow.value);
+    data.append('profficiency', profficiency.value);
+    data.append('languages', languages.value);
+    data.append('talent', talent.value);
+    data.append('manners', manners.value);
+    data.append('conversation', conversation.value);
+    data.append('ideal', ideal.value);
+    data.append('bond', bond.value);
+    data.append('flaw', flaw.value);
+    data.append('kin', kin.value);
+    try {
+      await addCharacter(data);
+      enqueueSnackbar('Nowa postać została pomyślnie dodana', { variant: 'success' });
+      history.push('/');
+    } catch (e) {
+      const errorsValue = e.response.data ? e.response.data : '';
+      setErrors(errorsValue);
+      enqueueSnackbar('Wystąpił błąd walidacji', { variant: 'error' });
+    }
   };
 
-  render() {
-    const { classes, history } = this.props;
-
-    const {
-      name,
-      race,
-      sex,
-      job,
-      specialSign,
-      appearance,
-      abilityHigh,
-      abilityLow,
-      profficiency,
-      languages,
-      talent,
-      manners,
-      conversation,
-      ideal,
-      bond,
-      flaw,
-      kin,
-      imgFile,
-      errors,
-    } = this.state;
-
-    return (
-      <Paper className={classes.root}>
-        <form noValidate autoComplete="off">
-          <div className={classes.section1}>
-            <Grid container justify="space-between">
-              <Grid container item sm={12} md={6}>
-                <Grid item xs={12}>
-                  <TextField
-                    id="name"
-                    label="Imię postaci"
-                    fullWidth
-                    error={!!errors.name}
-                    helperText={errors.name ? errors.name : undefined}
-                    value={name}
-                    onChange={this.handleChange('name')}
-                    margin="normal"
-                    variant="outlined"
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    id="race"
-                    label="Rasa"
-                    fullWidth
-                    value={race}
-                    onChange={this.handleChange('race')}
-                    margin="normal"
-                    variant="outlined"
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    id="sex"
-                    select
-                    label="Płeć"
-                    fullWidth
-                    value={sex}
-                    onChange={this.handleChange('sex')}
-                    SelectProps={{
-                      native: true,
-                    }}
-                    margin="normal"
-                    variant="outlined"
-                  >
-                    <option value="" />
-                    <option value="Mężczyzna">
-                      Mężczyzna
-                    </option>
-                    <option value="Kobieta">
-                      Kobieta
-                    </option>
-                  </TextField>
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    id="job"
-                    label="Zawód"
-                    fullWidth
-                    value={job}
-                    onChange={this.handleChange('job')}
-                    margin="normal"
-                    variant="outlined"
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    id="specialSign"
-                    label="Znak szczególny wyglądu"
-                    fullWidth
-                    value={specialSign}
-                    onChange={this.handleChange('specialSign')}
-                    margin="normal"
-                    variant="outlined"
-                  />
-                </Grid>
+  return (
+    <Paper className={classes.root}>
+      <form noValidate autoComplete="off">
+        <div className={classes.section1}>
+          <Grid container justify="space-between">
+            <Grid container item sm={12} md={6}>
+              <Grid item xs={12}>
+                <TextField
+                  multiline
+                  {...name}
+                  id="name"
+                  label="Imię postaci"
+                  fullWidth
+                  error={!!errors.name}
+                  helperText={errors.name ? errors.name : undefined}
+                  margin="normal"
+                  variant="outlined"
+                />
               </Grid>
-              <Grid container item sm={12} md={6} justify="center">
-                <Card className={classes.card}>
-                  <CardHeader
-                    title="Obraz postaci"
-                  />
-                  <CardMedia
-                    className={classes.media1}
-                    image={imgFile ? URL.createObjectURL(imgFile) : '/image.jpg'}
-                    title="Obraz Postaci"
-                  />
-                  <CardActions className={classes.actions} disableActionSpacing>
-                    <Button
-                      variant="contained"
-                      color="secondary"
-                      disabled={imgFile === null}
-                      className={classes.button}
-                      onClick={this.ClearImgFile}
-                    >
-                      Usuń
-                    </Button>
-                    <div className={classes.rightActions}>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  multiline
+                  {...race}
+                  id="race"
+                  label="Rasa"
+                  fullWidth
+                  margin="normal"
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  multiline
+                  {...sex}
+                  id="sex"
+                  select
+                  label="Płeć"
+                  fullWidth
+                  SelectProps={{
+                    native: true,
+                  }}
+                  margin="normal"
+                  variant="outlined"
+                >
+                  <option value="" />
+                  <option value="Mężczyzna">
+                    Mężczyzna
+                  </option>
+                  <option value="Kobieta">
+                    Kobieta
+                  </option>
+                </TextField>
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  multiline
+                  {...job}
+                  id="job"
+                  label="Zawód"
+                  fullWidth
+                  margin="normal"
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  multiline
+                  {...specialSign}
+                  id="specialSign"
+                  label="Znak szczególny wyglądu"
+                  fullWidth
+                  margin="normal"
+                  variant="outlined"
+                />
+              </Grid>
+            </Grid>
+            <Grid container item sm={12} md={6} justify="center">
+              <Card className={classes.card}>
+                <CardHeader
+                  title="Obraz postaci"
+                />
+                <CardMedia
+                  className={classes.media1}
+                  image={imgFile.showValue}
+                  title="Obraz Postaci"
+                />
+                <CardActions className={classes.actions} disableActionSpacing>
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    disabled={imgFile === null}
+                    className={classes.button}
+                    onClick={imgFile.clearValue}
+                  >
+                    Usuń
+                  </Button>
+                  <div className={classes.rightActions}>
+                    <label htmlFor="imgFile">
                       <input
                         type="file"
                         accept="image/*"
                         className={classes.input}
                         id="imgFile"
                         name="imgFile"
-                        onChange={this.handleImageSelect}
+                        onChange={imgFile.onChange}
                       />
-                      <label htmlFor="imgFile">
-                        <Button
-                          component="span"
-                          variant="contained"
-                          color="secondary"
-                          className={classes.button}
-                        >
-                          Dodaj
-                          <CloudUploadIcon className={classes.rightIcon} />
-                        </Button>
-                      </label>
-                    </div>
-                  </CardActions>
-                </Card>
-              </Grid>
+                      <Button
+                        component="span"
+                        variant="contained"
+                        color="secondary"
+                        className={classes.button}
+                      >
+                        Dodaj
+                        <CloudUploadIcon className={classes.rightIcon} />
+                      </Button>
+                    </label>
+                  </div>
+                </CardActions>
+              </Card>
             </Grid>
-          </div>
-          <Divider variant="middle" />
-          <div className={classes.section2}>
-            <Grid container justify="space-between">
-              <Grid item xs={12}>
-                <TextField
-                  id="appearance"
-                  fullWidth
-                  multiline
-                  label="Wygląd postaci"
-                  placeholder="Krótki opis wyglądu postaci (kolor włosów, oczu, karnacji lub znaki szczególne)"
-                  value={appearance}
-                  onChange={this.handleChange('appearance')}
-                  margin="normal"
-                  variant="outlined"
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  id="abilityHigh"
-                  select
-                  label="Wysoka statystyka"
-                  fullWidth
-                  value={abilityHigh}
-                  onChange={this.handleChange('abilityHigh')}
-                  SelectProps={{
-                    native: true,
-                  }}
-                  margin="normal"
-                  variant="outlined"
-                >
-                  {abilities.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </TextField>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  id="abilityLow"
-                  select
-                  label="Niska statystyka"
-                  fullWidth
-                  value={abilityLow}
-                  onChange={this.handleChange('abilityLow')}
-                  SelectProps={{
-                    native: true,
-                  }}
-                  margin="normal"
-                  variant="outlined"
-                >
-                  {abilities.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </TextField>
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  id="profficiency"
-                  label="Biegłość"
-                  fullWidth
-                  value={profficiency}
-                  onChange={this.handleChange('profficiency')}
-                  margin="normal"
-                  variant="outlined"
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  id="languages"
-                  label="Języki"
-                  fullWidth
-                  value={languages}
-                  onChange={this.handleChange('languages')}
-                  margin="normal"
-                  variant="outlined"
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  id="talent"
-                  label="Talent"
-                  fullWidth
-                  value={talent}
-                  onChange={this.handleChange('talent')}
-                  margin="normal"
-                  variant="outlined"
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  id="manners"
-                  label="Maniery"
-                  fullWidth
-                  value={manners}
-                  onChange={this.handleChange('manners')}
-                  margin="normal"
-                  variant="outlined"
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  id="conversation"
-                  label="Zachowanie podczas rozmowy"
-                  fullWidth
-                  value={conversation}
-                  onChange={this.handleChange('conversation')}
-                  margin="normal"
-                  variant="outlined"
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  id="ideal"
-                  label="Ideał"
-                  fullWidth
-                  value={ideal}
-                  onChange={this.handleChange('ideal')}
-                  margin="normal"
-                  variant="outlined"
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  id="bond"
-                  label="Więź/Zobowiązanie"
-                  fullWidth
-                  value={bond}
-                  onChange={this.handleChange('bond')}
-                  margin="normal"
-                  variant="outlined"
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  id="flaw"
-                  label="Wada/sekret"
-                  fullWidth
-                  value={flaw}
-                  onChange={this.handleChange('flaw')}
-                  margin="normal"
-                  variant="outlined"
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  id="kin"
-                  label="Krewni"
-                  fullWidth
-                  value={kin}
-                  onChange={this.handleChange('kin')}
-                  margin="normal"
-                  variant="outlined"
-                />
-              </Grid>
+          </Grid>
+        </div>
+        <Divider variant="middle" />
+        <div className={classes.section2}>
+          <Grid container justify="space-between">
+            <Grid item xs={12}>
+              <TextField
+                {...appearance}
+                id="appearance"
+                fullWidth
+                multiline
+                label="Wygląd postaci"
+                placeholder="Krótki opis wyglądu postaci (kolor włosów, oczu, karnacji lub znaki szczególne)"
+                margin="normal"
+                variant="outlined"
+              />
             </Grid>
-          </div>
-          <div className={classes.section3}>
-            <Grid container justify="space-between">
-              <Grid item>
-                <Button variant="contained" color="primary" onClick={() => history.push('/')}>
-                  Wstecz
-                </Button>
-              </Grid>
-              <Grid item>
-                <Button variant="contained" color="primary" onClick={this.handleSubmit}>
-                  Zapisz
-                </Button>
-              </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                multiline
+                {...abilityHigh}
+                id="abilityHigh"
+                select
+                label="Wysoka statystyka"
+                fullWidth
+                SelectProps={{
+                  native: true,
+                }}
+                margin="normal"
+                variant="outlined"
+              >
+                {abilitiesList.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </TextField>
             </Grid>
-          </div>
-        </form>
-      </Paper>
-    );
-  }
+            <Grid item xs={12} sm={6}>
+              <TextField
+                multiline
+                {...abilityLow}
+                id="abilityLow"
+                select
+                label="Niska statystyka"
+                fullWidth
+                SelectProps={{
+                  native: true,
+                }}
+                margin="normal"
+                variant="outlined"
+              >
+                {abilitiesList.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </TextField>
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                multiline
+                {...profficiency}
+                id="profficiency"
+                label="Biegłość"
+                fullWidth
+                margin="normal"
+                variant="outlined"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                multiline
+                {...languages}
+                id="languages"
+                label="Języki"
+                fullWidth
+                margin="normal"
+                variant="outlined"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                multiline
+                {...talent}
+                id="talent"
+                label="Talent"
+                fullWidth
+                margin="normal"
+                variant="outlined"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                multiline
+                {...manners}
+                id="manners"
+                label="Maniery"
+                fullWidth
+                margin="normal"
+                variant="outlined"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                multiline
+                {...conversation}
+                id="conversation"
+                label="Zachowanie podczas rozmowy"
+                fullWidth
+                margin="normal"
+                variant="outlined"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                multiline
+                {...ideal}
+                id="ideal"
+                label="Ideał"
+                fullWidth
+                margin="normal"
+                variant="outlined"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                multiline
+                {...bond}
+                id="bond"
+                label="Więź/Zobowiązanie"
+                fullWidth
+                margin="normal"
+                variant="outlined"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                multiline
+                {...flaw}
+                id="flaw"
+                label="Wada/sekret"
+                fullWidth
+                margin="normal"
+                variant="outlined"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                multiline
+                {...kin}
+                id="kin"
+                label="Krewni"
+                fullWidth
+                margin="normal"
+                variant="outlined"
+              />
+            </Grid>
+          </Grid>
+        </div>
+        <div className={classes.section3}>
+          <Grid container justify="space-between">
+            <Grid item>
+              <Button variant="contained" color="primary" onClick={() => history.push('/')}>
+                Wstecz
+              </Button>
+            </Grid>
+            <Grid item>
+              <Button variant="contained" color="primary" onClick={handleSubmit}>
+                Zapisz
+              </Button>
+            </Grid>
+          </Grid>
+        </div>
+      </form>
+    </Paper>
+  );
 }
 
 AddRecap.propTypes = {
-  classes: PropTypes.object.isRequired,
   history: PropTypes.shape({ push: PropTypes.func.isRequired }).isRequired,
   enqueueSnackbar: PropTypes.func.isRequired,
-  fetchData: PropTypes.func.isRequired,
 };
 
-export default withStyles(styles)(withSnackbar(AddRecap));
+export default withSnackbar(AddRecap);

@@ -1,71 +1,41 @@
-import React, { Component } from 'react';
+import React, { useEffect, useContext } from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
-import axios from 'axios';
-import { CSSTransition } from 'react-transition-group';
-import { SnackbarProvider } from 'notistack';
-
-// Style
-import '../styles/App.css';
 
 // Material-ui
 import CssBaseline from '@material-ui/core/CssBaseline';
-import { MuiThemeProvider } from '@material-ui/core';
-import theme from '../styles/theme';
 
+// Context
+import { CharactersContext } from '../context/CharactersContext';
 // Components
+import Authenticated from '../components/Authenticated';
+import Public from '../components/Public';
 import Navigation from '../components/Navigation';
 
 // Pages
 import Home from '../pages/Home';
 import AddNPC from '../pages/AddNPC';
 import EditNPC from '../pages/EditNPC';
+import Login from '../pages/Login';
 
-class App extends Component {
-  state = {
-    data: [],
-    appearHome: true,
-  };
+export default function App() {
+  const { fetchCharacters } = useContext(CharactersContext);
 
-  componentWillMount() {
-    this.fetchData();
-  }
+  useEffect(() => {
+    fetchCharacters();
+  }, []);
 
-  fetchData = () => {
-    axios.get('http://back.gostekk.pl/api/npcs')
-      .then((res) => {
-        this.setState({ data: res.data });
-      })
-      .catch(err => console.log(err));
-  }
-
-  render() {
-    const { data, appearHome } = this.state;
-
-    return (
-      <MuiThemeProvider theme={theme}>
-        <SnackbarProvider maxSnack={3}>
-          <Router>
-            <div>
-              <CssBaseline />
-              <Navigation />
-              <CSSTransition
-                in={appearHome}
-                appear={true}
-                timeout={600}
-                classNames="fade"
-              >
-                <Switch>
-                  <Route path="/" exact render={props => <Home {...props} data={data} fetchData={this.fetchData} />} />
-                  <Route path="/add" exact render={props => <AddNPC {...props} fetchData={this.fetchData} />} />
-                  <Route path="/edit/:id" exact render={props => <EditNPC {...props} fetchData={this.fetchData} />} />
-                </Switch>
-              </CSSTransition>
-            </div>
-          </Router>
-        </SnackbarProvider>
-      </MuiThemeProvider>
-    );
-  }
+  return (
+    <Router>
+      <div>
+        <CssBaseline />
+        <Navigation />
+        <Switch>
+          <Route path="/" exact component={Home} />
+          <Public path="/auth" exact component={Login} />
+          <Authenticated path="/add" exact component={AddNPC} />
+          <Authenticated path="/edit/:id" exact component={EditNPC} />
+        </Switch>
+      </div>
+    </Router>
+  );
 }
-
-export default App;

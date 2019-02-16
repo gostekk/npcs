@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
 
 // Material-ui
-import { withStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/styles';
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
 import CardMedia from '@material-ui/core/CardMedia';
@@ -14,7 +14,10 @@ import EditIcon from '@material-ui/icons/Edit';
 import InfoIcon from '@material-ui/icons/Info';
 import DeleteIcon from '@material-ui/icons/Delete';
 
-const styles = theme => ({
+// Context
+import { AppContext } from '../context/AppContext';
+
+const useStyles = makeStyles(theme => ({
   card: {
     [theme.breakpoints.down('xs')]: {
       width: '100%',
@@ -40,11 +43,12 @@ const styles = theme => ({
   delete: {
     color: theme.palette.primary,
   },
-});
+}));
 
 function NpcCard(props) {
+  const classes = useStyles();
+  const { auth } = useContext(AppContext);
   const {
-    classes,
     history,
     handleDelete,
     npc,
@@ -67,33 +71,45 @@ function NpcCard(props) {
         <IconButton aria-label="Pokaż więcej">
           <InfoIcon color="primary" />
         </IconButton>
-        <IconButton aria-label="Udostępnij">
-          <ShareIcon color="primary" />
-        </IconButton>
-        <div className={classes.rightActions}>
-          <IconButton
-            onClick={() => history.push(`/edit/${npc._id}`)}
-            aria-label="Edytuj"
-          >
-            <EditIcon color="primary" />
-          </IconButton>
-          <IconButton
-            onClick={() => handleDelete(npc._id)}
-            aria-label="Usuń"
-          >
-            <DeleteIcon color="error" />
-          </IconButton>
-        </div>
+        { auth
+          ? (
+            <React.Fragment>
+              <IconButton aria-label="Udostępnij">
+                <ShareIcon color="primary" />
+              </IconButton>
+              <div className={classes.rightActions}>
+                <IconButton
+                  onClick={() => history.push(`/edit/${npc._id}`)}
+                  aria-label="Edytuj"
+                >
+                  <EditIcon color="primary" />
+                </IconButton>
+                <IconButton
+                  onClick={() => handleDelete(npc._id)}
+                  aria-label="Usuń"
+                >
+                  <DeleteIcon color="error" />
+                </IconButton>
+              </div>
+            </React.Fragment>
+          )
+          : (
+            <div className={classes.rightActions}>
+              <IconButton aria-label="Udostępnij">
+                <ShareIcon color="primary" />
+              </IconButton>
+            </div>
+          )
+        }
       </CardActions>
     </Card>
   );
 }
 
 NpcCard.propTypes = {
-  classes: PropTypes.object.isRequired,
   history: PropTypes.shape({ push: PropTypes.func.isRequired }).isRequired,
   npc: PropTypes.object.isRequired,
   handleDelete: PropTypes.func.isRequired,
 };
 
-export default withRouter(withStyles(styles)(NpcCard));
+export default withRouter(NpcCard);

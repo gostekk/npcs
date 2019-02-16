@@ -1,15 +1,18 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
-import axios from 'axios';
 import { withSnackbar } from 'notistack';
 
 // Material-ui
-import { withStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/styles';
 import Grid from '@material-ui/core/Grid';
 
+// Context
+import { CharactersContext } from '../context/CharactersContext';
+
+// Component
 import NpcCard from '../components/NpcCard';
 
-const styles = theme => ({
+const useStyles = makeStyles(theme => ({
   root: {
     paddingTop: 10,
     overflow: 'hidden',
@@ -22,48 +25,40 @@ const styles = theme => ({
       display: 'flex',
     },
   },
-});
+}));
 
-class Home extends React.Component {
-  handleDeleteClick = (_id) => {
-    const { fetchData, enqueueSnackbar } = this.props;
+function Home(props) {
+  const { characters, deleteCharacter } = useContext(CharactersContext);
+  const classes = useStyles();
 
-    axios.post('http://127.0.0.1:5001/api/npcs/delete', { _id })
-      .then(() => {
-        enqueueSnackbar('Postać została usunięta', { variant: 'info' });
-        fetchData();
-      })
-      .catch(() => enqueueSnackbar('Wystąpił błąd podczas próby usunięcia postaci.', { variant: 'error' }));
-  }
+  const handleDeleteClick = async (_id) => {
+    const { enqueueSnackbar } = props;
+    try {
+      await deleteCharacter(_id);
+      enqueueSnackbar('Postać została usunięta', { variant: 'info' });
+    } catch (e) {
+      enqueueSnackbar('Wystąpił błąd podczas próby usunięcia postaci.', { variant: 'error' });
+    }
+  };
 
-  render() {
-    const {
-      classes,
-      data,
-    } = this.props;
-
-    return (
-      <div className={classes.root}>
-        <Grid className={classes.grid} container justify="center" spacing={16}>
-          { data.length
-            ? data.map(npc => (
-              <Grid key={npc._id} item>
-                <NpcCard npc={npc} handleDelete={this.handleDeleteClick} />
-              </Grid>
-            ))
-            : undefined
-          }
-        </Grid>
-      </div>
-    );
-  }
+  return (
+    <div className={classes.root}>
+      <Grid className={classes.grid} container justify="center" spacing={16}>
+        { characters.length
+          ? characters.map(npc => (
+            <Grid key={npc._id} item>
+              <NpcCard npc={npc} handleDelete={handleDeleteClick} />
+            </Grid>
+          ))
+          : undefined
+        }
+      </Grid>
+    </div>
+  );
 }
 
 Home.propTypes = {
-  classes: PropTypes.object.isRequired,
-  data: PropTypes.arrayOf(PropTypes.object).isRequired,
-  fetchData: PropTypes.func.isRequired,
   enqueueSnackbar: PropTypes.func.isRequired,
 };
 
-export default withStyles(styles)(withSnackbar(Home));
+export default withSnackbar(Home);
