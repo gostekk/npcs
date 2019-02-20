@@ -2,6 +2,15 @@
 All notable changes to this project will be documented in this file.
 
 ## [1.0.2] - 2019-02-20
+### Fix
+- AppContext auth initial value.
+- CharacterContext url host.
+
+### Removed
+- moment package.
+- classnames package.
+
+## [1.0.2] - 2019-02-20
 ### Added
 - Readme.md
 - Changelog.md

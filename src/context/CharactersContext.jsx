@@ -4,7 +4,7 @@ import axios from 'axios';
 
 const CharactersContext = createContext();
 
-const host = 'http://127.0.0.1:5001';
+const host = 'http://back.gostekk.pl';
 
 function CharactersProvider(props) {
   const [characters, setCharacters] = useState([]);

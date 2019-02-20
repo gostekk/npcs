@@ -56,7 +56,7 @@ const languagesList = [
 ];
 
 function AppProvider(props) {
-  const [auth, setAuth] = useState(true);
+  const [auth, setAuth] = useState(false);
   const { children } = props;
 
   function handleChange(e) {
