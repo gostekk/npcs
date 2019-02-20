@@ -29,18 +29,20 @@ const useStyles = makeStyles(theme => ({
       marginLeft: theme.spacing.unit * 2,
       marginTop: theme.spacing.unit * 2,
     },
-
+    [theme.breakpoints.down('xs')]: {
+      display: 'block',
+    },
+    [theme.breakpoints.up('sm')]: {
+      display: 'flex',
+    },
     paddingTop: theme.spacing.unit * 2,
     paddingBottom: theme.spacing.unit * 2,
   },
   card: {
     [theme.breakpoints.down('xs')]: {
-      width: 250,
+      width: '100%',
     },
-    [theme.breakpoints.between('xs', 'sm')]: {
-      width: 400,
-    },
-    [theme.breakpoints.up('md')]: {
+    [theme.breakpoints.up('sm')]: {
       width: 365,
     },
   },
@@ -221,6 +223,7 @@ function EditRecap(props) {
                   multiline
                   onChange={name.onChange}
                   value={name.value}
+                  required
                   id="name"
                   label="Imię postaci"
                   fullWidth
@@ -310,7 +313,7 @@ function EditRecap(props) {
                   <Button
                     variant="contained"
                     color="secondary"
-                    disabled={imgFile === null}
+                    disabled={imgFile.value === null}
                     className={classes.button}
                     onClick={imgFile.clearValue}
                   >

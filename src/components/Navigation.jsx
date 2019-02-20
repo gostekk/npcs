@@ -40,8 +40,12 @@ function Navigation(props) {
             NPC Sheet
           </Typography>
           { auth
-            ? <Button color="inherit" onClick={() => history.push('/add')}>Dodaj postać</Button>
+            ? undefined
             : <Button color="inherit" onClick={() => history.push('/auth')}>Odblokuj</Button>
+          }
+          { location.pathname !== '/add' && auth
+            ? <Button color="inherit" onClick={() => history.push('/add')}>Dodaj postać</Button>
+            : undefined
           }
         </Toolbar>
       </AppBar>

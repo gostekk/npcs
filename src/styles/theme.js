@@ -3,7 +3,7 @@ import { createMuiTheme } from '@material-ui/core/styles';
 const styledBy = (property, mapping) => mapping[property];
 
 const colors = [
-  'default',
+  // 'default',
   'pink',
   'purple',
   'deepPurple',

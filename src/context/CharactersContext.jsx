@@ -4,35 +4,37 @@ import axios from 'axios';
 
 const CharactersContext = createContext();
 
+const host = 'http://127.0.0.1:5001';
+
 function CharactersProvider(props) {
   const [characters, setCharacters] = useState([]);
   const { children } = props;
 
   const fetchCharacters = async () => {
-    const result = await axios.get('http://back.gostekk.pl/api/npcs');
+    const result = await axios.get(`${host}/api/npcs`);
     setCharacters(result.data);
   };
 
   const addCharacter = async (character) => {
-    const result = await axios.post('http://back.gostekk.pl/api/npcs', character);
+    const result = await axios.post(`${host}/api/npcs`, character);
     fetchCharacters();
     return result;
   };
 
   const editCharacter = async (_id, newCharacter) => {
-    const result = await axios.post(`http://back.gostekk.pl/api/npcs/edit/${_id}`, newCharacter);
+    const result = await axios.post(`${host}/api/npcs/edit/${_id}`, newCharacter);
     fetchCharacters();
     return result;
   };
 
   const deleteCharacter = async (_id) => {
-    const result = await axios.post('http://back.gostekk.pl/api/npcs/delete', { _id });
+    const result = await axios.post(`${host}/api/npcs/delete`, { _id });
     fetchCharacters();
     return result;
   };
 
   const getCharacter = async (_id) => {
-    const result = await axios.get(`http://back.gostekk.pl/api/npcs/${_id}`);
+    const result = await axios.get(`${host}/api/npcs/${_id}`);
     return result.data;
   };
 
