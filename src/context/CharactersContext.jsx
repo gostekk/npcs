@@ -4,13 +4,23 @@ import axios from 'axios';
 
 const CharactersContext = createContext();
 
-const host = 'http://back.gostekk.pl';
+const host = 'http://127.0.0.1:5001';
 
 function CharactersProvider(props) {
   const [characters, setCharacters] = useState([]);
   const { children } = props;
 
+  function setCharToken() {
+    const token = localStorage.jwtToken;
+    if (token) {
+      axios.defaults.headers.common.Authorization = token;
+    } else {
+      delete axios.defaults.headers.common.Authorization;
+    }
+  }
+
   const fetchCharacters = async () => {
+    await setCharToken();
     const result = await axios.get(`${host}/api/npcs`);
     setCharacters(result.data);
   };
@@ -47,6 +57,7 @@ function CharactersProvider(props) {
         editCharacter,
         deleteCharacter,
         getCharacter,
+        setCharToken,
       }}
     >
       {children}

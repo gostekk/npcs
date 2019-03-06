@@ -12,7 +12,7 @@ import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/styles';
 
 // Context
-import { AppContext } from '../context/AppContext';
+import { AuthContext } from '../context/AuthContext';
 
 const useStyles = makeStyles({
   grow: {
@@ -22,14 +22,14 @@ const useStyles = makeStyles({
 
 function Navigation(props) {
   const classes = useStyles();
-  const { auth } = useContext(AppContext);
+  const { auth } = useContext(AuthContext);
   const { history, location } = props;
 
   return (
     <div>
       <AppBar color="secondary" position="static" variant="regular">
         <Toolbar>
-          { location.pathname !== '/'
+          { location.pathname !== '/' && location.pathname !== '/login'
             ? (
               <IconButton aria-label="Back" color="inherit" hidden onClick={() => history.push('/')}>
                 <ArrowBack />
@@ -39,10 +39,6 @@ function Navigation(props) {
           <Typography variant="h6" align={location.pathname === '/' ? 'left' : 'center'} color="inherit" className={classes.grow}>
             NPC Sheet
           </Typography>
-          { auth
-            ? undefined
-            : <Button color="inherit" onClick={() => history.push('/auth')}>Odblokuj</Button>
-          }
           { location.pathname !== '/add' && auth
             ? <Button color="inherit" onClick={() => history.push('/add')}>Dodaj postać</Button>
             : undefined

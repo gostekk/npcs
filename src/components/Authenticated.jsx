@@ -1,9 +1,9 @@
 import React, { useContext } from 'react';
 import { Route, Redirect } from 'react-router-dom';
-import { AppContext } from '../context/AppContext';
+import { AuthContext } from '../context/AuthContext';
 
 export default function Authenticated({ component: Component, ...rest }) {
-  const { auth } = useContext(AppContext);
+  const { auth } = useContext(AuthContext);
 
   return (
     <Route
@@ -11,7 +11,7 @@ export default function Authenticated({ component: Component, ...rest }) {
       render={props => (
         auth === true
           ? <Component {...props} />
-          : <Redirect to="/auth" />
+          : <Redirect to="/login" />
       )}
     />
   );

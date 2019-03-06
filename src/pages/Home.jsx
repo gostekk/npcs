@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { withSnackbar } from 'notistack';
 
@@ -28,8 +28,12 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function Home(props) {
-  const { characters, deleteCharacter } = useContext(CharactersContext);
+  const { fetchCharacters, characters, deleteCharacter } = useContext(CharactersContext);
   const classes = useStyles();
+
+  useEffect(() => {
+    fetchCharacters();
+  }, []);
 
   const handleDeleteClick = async (_id) => {
     const { enqueueSnackbar } = props;

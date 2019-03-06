@@ -8,25 +8,31 @@ import FormHelperText from '@material-ui/core/FormHelperText';
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import Paper from '@material-ui/core/Paper';
+import Grid from '@material-ui/core/Grid';
 
 // Context
-import { AppContext } from '../context/AppContext';
+import { AuthContext } from '../context/AuthContext';
 
 const useStyles = makeStyles(theme => ({
   main: {
     width: 'auto',
-    display: 'block', // Fix IE 11 issue.
-    marginLeft: theme.spacing.unit * 2,
-    marginRight: theme.spacing.unit * 2,
-    [theme.breakpoints.up('xs')]: {
+    display: 'flex', // Fix IE 11 issue.
+    marginLeft: 0,
+    marginRight: 0,
+    justify: 'center',
+    justifyItems: 'center',
+    alignItems: 'center',
+    [theme.breakpoints.between('xs', 'sm')]: {
+      marginLeft: theme.spacing.unit,
+      marginRight: theme.spacing.unit,
+    },
+    [theme.breakpoints.up('md')]: {
       width: 400,
       marginLeft: 'auto',
       marginRight: 'auto',
     },
   },
   paper: {
-    position: 'absolute',
-    top: '40%',
     padding: '0px 8px 8px 8px',
   },
   form: {
@@ -52,55 +58,94 @@ function useFormInput(initialValue) {
 }
 
 function Login() {
+  const username = useFormInput('');
   const password = useFormInput('');
-  const [error, setError] = useState('');
-  const { authenticate } = useContext(AppContext);
+  const [error, setError] = useState({});
+  const { login } = useContext(AuthContext);
   const classes = useStyles();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const user = {
+      username: username.value,
+      password: password.value,
+    };
+
     try {
-      await authenticate(password.value);
+      await login(user);
     } catch (err) {
-      setError(err.response.data.error);
+      setError(err.response.data.errors);
     }
   };
 
   return (
-    <main className={classes.main}>
-      <Paper className={classes.paper}>
-        <form noValidate onSubmit={handleSubmit} autoComplete="off" className={classes.form}>
-          <FormControl margin="normal" fullWidth variant="outlined">
-            <InputLabel htmlFor="password">Hasło</InputLabel>
-            <Input
-              {...password}
-              name="password"
-              type="password"
-              id="password"
-              autoFocus
-            />
-            { error
-              ? (
-                <FormHelperText error>
-                  {error}
-                </FormHelperText>
-              )
-              : undefined
-            }
-          </FormControl>
-          <Button
-            onClick={handleSubmit}
-            type="button"
-            fullWidth
-            variant="contained"
-            color="primary"
-            className={classes.submit}
-          >
-            Odblokuj
-          </Button>
-        </form>
-      </Paper>
-    </main>
+    <Grid
+      container
+      direction="row"
+      justify="center"
+      alignItems="flex-end"
+    >
+      <Grid item>
+        <Paper className={classes.paper}>
+          <form noValidate onSubmit={handleSubmit} autoComplete="off" className={classes.form}>
+            <FormControl margin="normal" fullWidth variant="outlined">
+              <InputLabel htmlFor="username">Username</InputLabel>
+              <Input
+                {...username}
+                id="username"
+                name="username"
+                autoComplete="username"
+                autoFocus
+              />
+              { error.username
+                ? (
+                  <FormHelperText error>
+                    {error.username}
+                  </FormHelperText>
+                )
+                : undefined
+              }
+            </FormControl>
+            <FormControl margin="normal" fullWidth variant="outlined">
+              <InputLabel htmlFor="password">Hasło</InputLabel>
+              <Input
+                {...password}
+                name="password"
+                type="password"
+                id="password"
+              />
+              { error.password
+                ? (
+                  <FormHelperText error>
+                    {error.password}
+                  </FormHelperText>
+                )
+                : undefined
+              }
+              { error.error
+                ? (
+                  <FormHelperText error>
+                    {error.error}
+                  </FormHelperText>
+                )
+                : undefined
+              }
+            </FormControl>
+            <Button
+              onClick={handleSubmit}
+              type="button"
+              fullWidth
+              variant="contained"
+              color="primary"
+              className={classes.submit}
+            >
+              Zaloguj
+            </Button>
+          </form>
+        </Paper>
+      </Grid>
+    </Grid>
   );
 }
 

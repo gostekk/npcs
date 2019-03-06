@@ -6,6 +6,7 @@ import { ThemeProvider } from '@material-ui/styles';
 import theme from '../styles/theme';
 import { CharactersProvider } from './CharactersContext';
 import { AppProvider } from './AppContext';
+import { AuthProvider } from './AuthContext';
 
 function Provider(props) {
   const { children } = props;
@@ -13,11 +14,13 @@ function Provider(props) {
     <MuiThemeProvider theme={theme}>
       <ThemeProvider theme={theme}>
         <SnackbarProvider maxSnack={3}>
-          <AppProvider>
-            <CharactersProvider>
-              {children}
-            </CharactersProvider>
-          </AppProvider>
+          <AuthProvider>
+            <AppProvider>
+              <CharactersProvider>
+                {children}
+              </CharactersProvider>
+            </AppProvider>
+          </AuthProvider>
         </SnackbarProvider>
       </ThemeProvider>
     </MuiThemeProvider>

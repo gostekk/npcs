@@ -15,7 +15,7 @@ import InfoIcon from '@material-ui/icons/Info';
 import DeleteIcon from '@material-ui/icons/Delete';
 
 // Context
-import { AppContext } from '../context/AppContext';
+import { AuthContext } from '../context/AuthContext';
 
 const useStyles = makeStyles(theme => ({
   card: {
@@ -47,7 +47,7 @@ const useStyles = makeStyles(theme => ({
 
 function NpcCard(props) {
   const classes = useStyles();
-  const { auth } = useContext(AppContext);
+  const { auth } = useContext(AuthContext);
   const {
     history,
     handleDelete,
