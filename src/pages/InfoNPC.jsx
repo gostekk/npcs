@@ -41,15 +41,6 @@ const useStyles = makeStyles(theme => ({
       width: 365,
     },
   },
-  input: {
-    display: 'none',
-  },
-  button: {
-    margin: theme.spacing.unit,
-  },
-  rightIcon: {
-    marginLeft: theme.spacing.unit,
-  },
   section1: {
     margin: `${theme.spacing.unit * 3}px ${theme.spacing.unit * 2}px`,
   },
@@ -59,12 +50,6 @@ const useStyles = makeStyles(theme => ({
   media1: {
     height: 0,
     paddingTop: '70%',
-  },
-  actions: {
-    display: 'flex',
-  },
-  rightActions: {
-    marginLeft: 'auto',
   },
 }));
 
@@ -84,7 +69,7 @@ function useImageInput(initialValue) {
   };
 }
 
-function InfoNPC(props) {
+function InfoNPC() {
   const imgFile = useImageInput(null);
   const { npc } = useContext(CharactersContext);
   const classes = useStyles();
