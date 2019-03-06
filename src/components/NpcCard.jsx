@@ -16,6 +16,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 
 // Context
 import { AuthContext } from '../context/AuthContext';
+import { CharactersContext } from '../context/CharactersContext';
 
 const useStyles = makeStyles(theme => ({
   card: {
@@ -48,6 +49,7 @@ const useStyles = makeStyles(theme => ({
 function NpcCard(props) {
   const classes = useStyles();
   const { auth } = useContext(AuthContext);
+  const { npcSet } = useContext(CharactersContext);
   const {
     history,
     handleDelete,
@@ -55,6 +57,11 @@ function NpcCard(props) {
   } = props;
 
   const image = !npc.imgFile ? '/image.jpg' : `/images/${npc.imgFile}`;
+
+  async function handleClick() {
+    npcSet(npc);
+    history.push('/info');
+  }
 
   return (
     <Card className={classes.card} raised>
@@ -68,7 +75,10 @@ function NpcCard(props) {
         title={npc.name}
       />
       <CardActions className={classes.actions} disableActionSpacing>
-        <IconButton aria-label="Pokaż więcej">
+        <IconButton
+          onClick={() => handleClick()}
+          aria-label="Pokaż więcej"
+        >
           <InfoIcon color="primary" />
         </IconButton>
         { auth

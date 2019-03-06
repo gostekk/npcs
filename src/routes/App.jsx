@@ -12,6 +12,7 @@ import Navigation from '../components/Navigation';
 // Pages
 import Home from '../pages/Home';
 import AddNPC from '../pages/AddNPC';
+import InfoNPC from '../pages/InfoNPC';
 import EditNPC from '../pages/EditNPC';
 import Login from '../pages/Login';
 
@@ -25,6 +26,7 @@ export default function App() {
           <Authenticated path="/" exact component={Home} />
           <Public path="/login" exact component={Login} />
           <Authenticated path="/add" exact component={AddNPC} />
+          <Authenticated path="/info" exact component={InfoNPC} />
           <Authenticated path="/edit/:id" exact component={EditNPC} />
         </Switch>
       </div>

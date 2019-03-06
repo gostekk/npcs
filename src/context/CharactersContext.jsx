@@ -8,6 +8,7 @@ const host = 'http://127.0.0.1:5001';
 
 function CharactersProvider(props) {
   const [characters, setCharacters] = useState([]);
+  const [npc, setNpc] = useState({});
   const { children } = props;
 
   function setCharToken() {
@@ -48,6 +49,10 @@ function CharactersProvider(props) {
     return result.data;
   };
 
+  const npcSet = async (character) => {
+    setNpc(character);
+  };
+
   return (
     <CharactersContext.Provider
       value={{
@@ -58,6 +63,8 @@ function CharactersProvider(props) {
         deleteCharacter,
         getCharacter,
         setCharToken,
+        npc,
+        npcSet,
       }}
     >
       {children}

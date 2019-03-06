@@ -1,6 +1,15 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.0.3] - 2019-**-**
+### Add
+- Application now is using Context API.
+- Info page
+
+### Changed
+- Rerwited components to use Hooks functions.
+- Authentication now require login and passport to application.
+
 ## [1.0.2] - 2019-02-20
 ### Fix
 - AppContext auth initial value.
