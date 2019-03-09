@@ -81,7 +81,7 @@ function NpcCard(props) {
         >
           <InfoIcon color="primary" />
         </IconButton>
-        { user._id === npc.owner || user.permissions.npcs.admin
+        { user.id === npc.owner || user.permissions.npcs.admin
           ? (
             <React.Fragment>
               <IconButton
