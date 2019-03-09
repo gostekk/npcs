@@ -48,7 +48,7 @@ const useStyles = makeStyles(theme => ({
 
 function NpcCard(props) {
   const classes = useStyles();
-  const { auth } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
   const { npcSet } = useContext(CharactersContext);
   const {
     history,
@@ -81,10 +81,13 @@ function NpcCard(props) {
         >
           <InfoIcon color="primary" />
         </IconButton>
-        { auth
+        { user._id === npc.owner || user.permissions.npcs.admin
           ? (
             <React.Fragment>
-              <IconButton aria-label="Udostępnij">
+              <IconButton
+                onClick={() => history.push(`/comment/${npc._id}`)}
+                aria-label="Komentarz"
+              >
                 <CommentIcon color="primary" />
               </IconButton>
               <div className={classes.rightActions}>
@@ -105,7 +108,10 @@ function NpcCard(props) {
           )
           : (
             <div className={classes.rightActions}>
-              <IconButton aria-label="Udostępnij">
+              <IconButton
+                onClick={() => history.push(`/comment/${npc._id}`)}
+                aria-label="Komentarz"
+              >
                 <CommentIcon color="primary" />
               </IconButton>
             </div>

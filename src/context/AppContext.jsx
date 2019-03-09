@@ -1,4 +1,4 @@
-import React, { createContext, useState } from 'react';
+import React, { createContext } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 
@@ -55,28 +55,26 @@ const languagesList = [
   'Druidic',
 ];
 
+const host = 'http://127.0.0.1:5001';
+
 function AppProvider(props) {
-  const [auth, setAuth] = useState(false);
   const { children } = props;
 
-  function handleChange(e) {
-    setAuth(e);
-  }
+  const saveComment = async (npcId, userId, comment) => {
+    const result = await axios.post(`${host}/api/npcs/comment`, { npcId, userId, comment });
+    return result.data;
+  };
 
-  const authenticate = async (password) => {
-    const result = await axios.post('http://back.gostekk.pl/api/npcs/auth', { password });
-    if (result.data) {
-      handleChange(result.data);
-    } else {
-      throw Error;
-    }
+  const getComment = async (_id) => {
+    const result = await axios.get(`${host}/api/npcs/comment/${_id}`);
+    return result.data.comment;
   };
 
   return (
     <AppContext.Provider
       value={{
-        auth,
-        authenticate,
+        saveComment,
+        getComment,
         abilitiesList,
         languagesList,
       }}
