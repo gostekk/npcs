@@ -12,7 +12,6 @@ import { makeStyles } from '@material-ui/styles';
 // Context
 import { AuthContext } from '../context/AuthContext';
 import { AppContext } from '../context/AppContext';
-// import { AppContext } from '../context/AppContext';
 
 const useStyles = makeStyles(theme => ({
   root: {

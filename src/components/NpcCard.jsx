@@ -13,6 +13,7 @@ import CommentIcon from '@material-ui/icons/Comment';
 import EditIcon from '@material-ui/icons/Edit';
 import InfoIcon from '@material-ui/icons/Info';
 import DeleteIcon from '@material-ui/icons/Delete';
+import VpnKey from '@material-ui/icons/VpnKey';
 
 // Context
 import { AuthContext } from '../context/AuthContext';
@@ -49,7 +50,7 @@ const useStyles = makeStyles(theme => ({
 function NpcCard(props) {
   const classes = useStyles();
   const { user } = useContext(AuthContext);
-  const { npcSet } = useContext(CharactersContext);
+  const { changeOwner, npcSet } = useContext(CharactersContext);
   const {
     history,
     handleDelete,
@@ -61,6 +62,10 @@ function NpcCard(props) {
   async function handleClick() {
     npcSet(npc);
     history.push('/info');
+  }
+
+  function handleChangeOwner() {
+    changeOwner(npc._id);
   }
 
   return (
@@ -91,6 +96,17 @@ function NpcCard(props) {
                 <CommentIcon color="primary" />
               </IconButton>
               <div className={classes.rightActions}>
+                { user.permissions.npcs.admin && user.id !== npc.owner
+                  ? (
+                    <IconButton
+                      onClick={() => handleChangeOwner()}
+                      aria-label="Przypisz do mnie"
+                    >
+                      <VpnKey color="primary" />
+                    </IconButton>
+                  )
+                  : undefined
+                }
                 <IconButton
                   onClick={() => history.push(`/edit/${npc._id}`)}
                   aria-label="Edytuj"

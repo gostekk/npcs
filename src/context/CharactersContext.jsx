@@ -49,6 +49,19 @@ function CharactersProvider(props) {
     return result.data;
   };
 
+  const updateCharacters = async (character) => {
+    const index = await characters.findIndex(x => x._id === character._id);
+    const newCharacters = characters;
+    newCharacters[index] = character;
+    setCharacters(newCharacters);
+  };
+
+  const changeOwner = async (npcId) => {
+    const result = await axios.post(`${host}/api/npcs/owner`, { npcId });
+    updateCharacters(result.data);
+    return result.data;
+  };
+
   const npcSet = async (character) => {
     setNpc(character);
   };
@@ -63,6 +76,7 @@ function CharactersProvider(props) {
         deleteCharacter,
         getCharacter,
         setCharToken,
+        changeOwner,
         npc,
         npcSet,
       }}
