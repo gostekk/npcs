@@ -9,7 +9,7 @@ import CardHeader from '@material-ui/core/CardHeader';
 import CardMedia from '@material-ui/core/CardMedia';
 import CardActions from '@material-ui/core/CardActions';
 import IconButton from '@material-ui/core/IconButton';
-import ShareIcon from '@material-ui/icons/Share';
+import CommentIcon from '@material-ui/icons/Comment';
 import EditIcon from '@material-ui/icons/Edit';
 import InfoIcon from '@material-ui/icons/Info';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -85,7 +85,7 @@ function NpcCard(props) {
           ? (
             <React.Fragment>
               <IconButton aria-label="Udostępnij">
-                <ShareIcon color="primary" />
+                <CommentIcon color="primary" />
               </IconButton>
               <div className={classes.rightActions}>
                 <IconButton
@@ -106,7 +106,7 @@ function NpcCard(props) {
           : (
             <div className={classes.rightActions}>
               <IconButton aria-label="Udostępnij">
-                <ShareIcon color="primary" />
+                <CommentIcon color="primary" />
               </IconButton>
             </div>
           )
