@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 ### Add
 - Application now is using Context API.
 - Info page
+- Add sharing npcs between users
+- Add change owner button for admins
+- Add Comments
 
 ### Changed
 - Rerwited components to use Hooks functions.
