@@ -16,6 +16,7 @@ import InfoNPC from '../pages/InfoNPC';
 import EditNPC from '../pages/EditNPC';
 import Login from '../pages/Login';
 import Comment from '../pages/Comment';
+import SettingsNPC from '../pages/SettingsNPC';
 
 export default function App() {
   return (
@@ -30,6 +31,7 @@ export default function App() {
           <Authenticated path="/info" exact component={InfoNPC} />
           <Authenticated path="/edit/:id" exact component={EditNPC} />
           <Authenticated path="/comment/:id" exact component={Comment} />
+          <Authenticated path="/settings" exact component={SettingsNPC} />
         </Switch>
       </div>
     </Router>

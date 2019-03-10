@@ -14,13 +14,13 @@ function Provider(props) {
     <MuiThemeProvider theme={theme}>
       <ThemeProvider theme={theme}>
         <SnackbarProvider maxSnack={3}>
-          <AuthProvider>
-            <AppProvider>
+          <AppProvider>
+            <AuthProvider>
               <CharactersProvider>
                 {children}
               </CharactersProvider>
-            </AppProvider>
-          </AuthProvider>
+            </AuthProvider>
+          </AppProvider>
         </SnackbarProvider>
       </ThemeProvider>
     </MuiThemeProvider>

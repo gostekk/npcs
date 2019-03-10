@@ -15,6 +15,7 @@ import CardMedia from '@material-ui/core/CardMedia';
 
 // Context
 import { CharactersContext } from '../context/CharactersContext';
+import { AuthContext } from '../context/AuthContext';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -72,6 +73,7 @@ function useImageInput(initialValue) {
 function InfoNPC() {
   const imgFile = useImageInput(null);
   const { npc } = useContext(CharactersContext);
+  const { user } = useContext(AuthContext)
   const classes = useStyles();
 
   return (
@@ -154,162 +156,169 @@ function InfoNPC() {
             </Grid>
           </Grid>
         </div>
-        <Divider variant="middle" />
-        <div className={classes.section2}>
-          <Grid container justify="space-between">
-            <Grid item xs={12}>
-              <TextField
-                value={npc.appearance}
-                readOnly
-                id="appearance"
-                fullWidth
-                multiline
-                label="Wygląd postaci"
-                placeholder="Krótki opis wyglądu postaci (kolor włosów, oczu, karnacji lub znaki szczególne)"
-                margin="normal"
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                multiline
-                value={npc.abilityHigh}
-                readOnly
-                id="abilityHigh"
-                label="Wysoka statystyka"
-                fullWidth
-                SelectProps={{
-                  native: true,
-                }}
-                margin="normal"
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                multiline
-                value={npc.abilityLow}
-                readOnly
-                id="abilityLow"
-                label="Niska statystyka"
-                fullWidth
-                SelectProps={{
-                  native: true,
-                }}
-                margin="normal"
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                multiline
-                value={npc.profficiency}
-                readOnly
-                id="profficiency"
-                label="Biegłość"
-                fullWidth
-                margin="normal"
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                multiline
-                value={npc.languages}
-                readOnly
-                id="languages"
-                label="Języki"
-                fullWidth
-                margin="normal"
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                multiline
-                readOnly
-                value={npc.talent}
-                id="talent"
-                label="Talent"
-                fullWidth
-                margin="normal"
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                multiline
-                value={npc.manners}
-                readOnly
-                id="manners"
-                label="Maniery"
-                fullWidth
-                margin="normal"
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                multiline
-                value={npc.conversation}
-                readOnly
-                id="conversation"
-                label="Zachowanie podczas rozmowy"
-                fullWidth
-                margin="normal"
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                multiline
-                value={npc.ideal}
-                readOnly
-                id="ideal"
-                label="Ideał"
-                fullWidth
-                margin="normal"
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                multiline
-                value={npc.bond}
-                readOnly
-                id="bond"
-                label="Więź/Zobowiązanie"
-                fullWidth
-                margin="normal"
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                multiline
-                value={npc.flaw}
-                readOnly
-                id="flaw"
-                label="Wada/sekret"
-                fullWidth
-                margin="normal"
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                multiline
-                value={npc.kin}
-                readOnly
-                id="kin"
-                label="Krewni"
-                fullWidth
-                margin="normal"
-                variant="outlined"
-              />
-            </Grid>
-          </Grid>
-        </div>
+        { user._id === npc.owner || user.permissions.npcs.admin
+          ? (
+            <React.Fragment>
+              <Divider variant="middle" />
+              <div className={classes.section2}>
+                <Grid container justify="space-between">
+                  <Grid item xs={12}>
+                    <TextField
+                      value={npc.appearance}
+                      readOnly
+                      id="appearance"
+                      fullWidth
+                      multiline
+                      label="Wygląd postaci"
+                      placeholder="Krótki opis wyglądu postaci (kolor włosów, oczu, karnacji lub znaki szczególne)"
+                      margin="normal"
+                      variant="outlined"
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      multiline
+                      value={npc.abilityHigh}
+                      readOnly
+                      id="abilityHigh"
+                      label="Wysoka statystyka"
+                      fullWidth
+                      SelectProps={{
+                        native: true,
+                      }}
+                      margin="normal"
+                      variant="outlined"
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      multiline
+                      value={npc.abilityLow}
+                      readOnly
+                      id="abilityLow"
+                      label="Niska statystyka"
+                      fullWidth
+                      SelectProps={{
+                        native: true,
+                      }}
+                      margin="normal"
+                      variant="outlined"
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      multiline
+                      value={npc.profficiency}
+                      readOnly
+                      id="profficiency"
+                      label="Biegłość"
+                      fullWidth
+                      margin="normal"
+                      variant="outlined"
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      multiline
+                      value={npc.languages}
+                      readOnly
+                      id="languages"
+                      label="Języki"
+                      fullWidth
+                      margin="normal"
+                      variant="outlined"
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      multiline
+                      readOnly
+                      value={npc.talent}
+                      id="talent"
+                      label="Talent"
+                      fullWidth
+                      margin="normal"
+                      variant="outlined"
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      multiline
+                      value={npc.manners}
+                      readOnly
+                      id="manners"
+                      label="Maniery"
+                      fullWidth
+                      margin="normal"
+                      variant="outlined"
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      multiline
+                      value={npc.conversation}
+                      readOnly
+                      id="conversation"
+                      label="Zachowanie podczas rozmowy"
+                      fullWidth
+                      margin="normal"
+                      variant="outlined"
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      multiline
+                      value={npc.ideal}
+                      readOnly
+                      id="ideal"
+                      label="Ideał"
+                      fullWidth
+                      margin="normal"
+                      variant="outlined"
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      multiline
+                      value={npc.bond}
+                      readOnly
+                      id="bond"
+                      label="Więź/Zobowiązanie"
+                      fullWidth
+                      margin="normal"
+                      variant="outlined"
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      multiline
+                      value={npc.flaw}
+                      readOnly
+                      id="flaw"
+                      label="Wada/sekret"
+                      fullWidth
+                      margin="normal"
+                      variant="outlined"
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      multiline
+                      value={npc.kin}
+                      readOnly
+                      id="kin"
+                      label="Krewni"
+                      fullWidth
+                      margin="normal"
+                      variant="outlined"
+                    />
+                  </Grid>
+                </Grid>
+              </div>
+            </React.Fragment>
+          )
+          : undefined
+        }
       </form>
     </Paper>
   );

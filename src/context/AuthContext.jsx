@@ -1,7 +1,15 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+} from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 import jwtDecode from 'jwt-decode';
+
+// Context
+import { AppContext } from './AppContext';
 
 const AuthContext = createContext();
 
@@ -10,6 +18,7 @@ const host = 'http://127.0.0.1:5001';
 function AuthProvider(props) {
   const [auth, setAuth] = useState(false);
   const [user, setUser] = useState(undefined);
+  const { initApp } = useContext(AppContext);
   const { children } = props;
 
   function setAuthToken(token) {
@@ -33,6 +42,7 @@ function AuthProvider(props) {
     const decoded = jwtDecode(token);
     setUser(decoded);
     setAuth(true);
+    initApp(decoded.id);
     return result;
   }
 
@@ -63,6 +73,7 @@ function AuthProvider(props) {
       setUser(decoded);
       setAuth(true);
       checkToken(token);
+      initApp(decoded.id);
     }
   }, []);
 

@@ -14,6 +14,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import InfoIcon from '@material-ui/icons/Info';
 import DeleteIcon from '@material-ui/icons/Delete';
 import VpnKey from '@material-ui/icons/VpnKey';
+import SettingsIcon from '@material-ui/icons/Settings';
 
 // Context
 import { AuthContext } from '../context/AuthContext';
@@ -59,9 +60,10 @@ function NpcCard(props) {
   } = props;
 
   const image = !npc.imgFile ? '/image.jpg' : `/images/${npc.imgFile}`;
-  async function handleClick() {
+
+  async function handleClick(url) {
     npcSet(npc);
-    history.push('/info');
+    history.push(url);
   }
 
   function handleChangeOwner() {
@@ -82,7 +84,7 @@ function NpcCard(props) {
       />
       <CardActions className={classes.actions} disableActionSpacing>
         <IconButton
-          onClick={() => handleClick()}
+          onClick={() => handleClick('/info')}
           aria-label="Pokaż więcej"
         >
           <InfoIcon color="primary" />
@@ -119,6 +121,12 @@ function NpcCard(props) {
                   aria-label="Usuń"
                 >
                   <DeleteIcon color="error" />
+                </IconButton>
+                <IconButton
+                  onClick={() => handleClick('/settings')}
+                  aria-label="Ustawienia"
+                >
+                  <SettingsIcon color="primary" />
                 </IconButton>
               </div>
             </React.Fragment>
