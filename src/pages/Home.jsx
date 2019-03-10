@@ -31,8 +31,12 @@ function Home(props) {
   const { fetchCharacters, characters, deleteCharacter } = useContext(CharactersContext);
   const classes = useStyles();
 
-  useEffect(() => {
+  async function load() {
     fetchCharacters();
+  }
+
+  useEffect(() => {
+    load();
   }, []);
 
   const handleDeleteClick = async (_id) => {

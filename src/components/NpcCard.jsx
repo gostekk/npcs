@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
 
@@ -48,6 +48,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function NpcCard(props) {
+  const [owner, setOwner] = useState(true);
   const classes = useStyles();
   const { user } = useContext(AuthContext);
   const { changeOwner, npcSet } = useContext(CharactersContext);
@@ -58,7 +59,6 @@ function NpcCard(props) {
   } = props;
 
   const image = !npc.imgFile ? '/image.jpg' : `/images/${npc.imgFile}`;
-
   async function handleClick() {
     npcSet(npc);
     history.push('/info');
@@ -66,6 +66,7 @@ function NpcCard(props) {
 
   function handleChangeOwner() {
     changeOwner(npc._id);
+    setOwner(false);
   }
 
   return (
@@ -96,7 +97,7 @@ function NpcCard(props) {
                 <CommentIcon color="primary" />
               </IconButton>
               <div className={classes.rightActions}>
-                { user.permissions.npcs.admin && user.id !== npc.owner
+                { user.permissions.npcs.admin && user.id !== npc.owner && owner
                   ? (
                     <IconButton
                       onClick={() => handleChangeOwner()}
